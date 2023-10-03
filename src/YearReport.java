@@ -1,10 +1,12 @@
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class YearReport {
 
     private FileReader fileReader;
-    private ArrayList<String> yearList = new ArrayList<>();
+    private ArrayList<TransactionYear> yearList = new ArrayList<>();
+    private TransactoinYears years;
 
     public YearReport(FileReader fileReader) {
         this.fileReader = fileReader;
@@ -12,8 +14,12 @@ public class YearReport {
 
     public void readerYear() {
         String numberMonth = "y.2021.csv";
-        yearList = fileReader.readFileContents(numberMonth);
-        yearList.remove(0);
+        ArrayList<String> list = fileReader.readFileContents(numberMonth);
+        for (int i = 1; i < list.size(); i++) {
+            String[] line = list.get(i).split(",");
+            years = new TransactoinYears(line);
+            yearList.add(years);
+        }
         System.out.println("Операция успешно выполнена!");
 
     }
@@ -23,41 +29,42 @@ public class YearReport {
     }
 
     public void getYear() {
+        int j = 1;
         System.out.println("Отчет за 2021 год");
-        for (int i = 0; i < yearList.size(); i+=2) {
-            String[] line = yearList.get(i).split(",");
-            int j = i+1;
-            String[] lineTwo = yearList.get(j).split(",");
-            System.out.println("Прибыль за "+getNameMonth(Integer.parseInt(line[0])) + " - "
-             + profitMont(line,lineTwo));
-        }
+        for (int i = 0; i<yearList.size(); i+=2) {
+            TransactionYear year = yearList.get(i);
+            TransactionYear year1 = yearList.get(j);
+            j+=2;
+                if (Objects.equals(year.getMonth(), year1.getMonth())){
+                    System.out.println("Прибыль за " + getNameMonth(Integer.parseInt(year.getMonth())) + " - "
+                            + profitMont(year,year1));
+                }
+            }
         System.out.println("Средний расход за все имеющиеся операции в году: " + averageWest());
         System.out.println("Средний доход за все имеющиеся операции в году: " + averageProfit());
 
     }
 
-    public ArrayList<String> getYearList(){
+    public ArrayList<TransactionYear> getYearList(){
         return yearList;
     }
 
-    private int profitMont(String[] line, String[] lineTwo) {
-        int profit;
-        if (!Boolean.parseBoolean(line[2])){
-            profit = Integer.parseInt(line[1]) - Integer.parseInt(lineTwo[1]);
+    private int profitMont(TransactionYear oneYear, TransactionYear twoYear) {
+        if (!oneYear.getExpense()){
+            return oneYear.getAmount() - twoYear.getAmount();
         }else {
-            profit = Integer.parseInt(lineTwo[1]) - Integer.parseInt(line[1]);
+            return twoYear.getAmount() - oneYear.getAmount();
         }
-        return profit;
+
     }
 
 
     private int averageWest() {
         int averWest = 0;
         int j = 0;
-        for (String s : yearList) {
-            String[] line = s.split(",");
-            if (Boolean.parseBoolean(line[2])) {
-                averWest += Integer.parseInt(line[1]);
+        for (TransactionYear year : yearList) {
+            if (year.getExpense()) {
+                averWest += year.getAmount();
                 j++;
             }
         }
@@ -67,10 +74,9 @@ public class YearReport {
     private int averageProfit() {
         int averProfit = 0;
         int j = 0;
-        for (String s : yearList) {
-            String[] line = s.split(",");
-            if (!Boolean.parseBoolean(line[2])) {
-                averProfit = +Integer.parseInt(line[1]);
+        for (TransactionYear year : yearList) {
+            if (!year.getExpense()) {
+                averProfit += year.getAmount();
                 j++;
             }
         }

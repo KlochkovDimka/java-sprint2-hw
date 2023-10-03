@@ -20,13 +20,13 @@ public class Main {
                 yearReport.readerYear();
             } else if (command == 3) {
                 if (comparisonData.examination()){
-                    comparisonData.comparisonMonthAndYear();
+                   comparisonData.comparisonMonthAndYear();
                 }
             } else if (command == 4) {
-                if (monthlyReport.exception()) {
+               if (monthlyReport.exception()) {
                     System.out.println("Считайте отчеты!");
-                }else {
-                    monthlyReport.get();
+               }else {
+                   monthlyReport.get();
                 }
             } else if (command == 5) {
                 if (yearReport.exception()) {
